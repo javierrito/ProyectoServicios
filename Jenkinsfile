@@ -12,26 +12,26 @@ pipeline {
                 dir('microservicio-service/'){
                     echo 'Execute Maven and Analizing with SonarServer'
                     withSonarQubeEnv('SonarServer') {
-                        sh "mvn clean package dependency-check:check sonar:sonar \
+                        sh "mvn clean" /*package dependency-check:check sonar:sonar \
                             -Dsonar.projectKey=21_MyCompany_Microservice \
                             -Dsonar.projectName=21_MyCompany_Microservice \
-                            -Dsonar.sources=src/main \
-                            -Dsonar.coverage.exclusions=**/*TO.java,**/*DO.java,**/curso/web/**/*,**/curso/persistence/**/*,**/curso/commons/**/*,**/curso/model/**/* \
-                            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
+                            -Dsonar.sources=src/main \*/
+                           // -Dsonar.coverage.exclusions=**/*TO.java,**/*DO.java,**/curso/web/**/*,**/curso/persistence/**/*,**/curso/commons/**/*,**/curso/model/**/* \
+                           /* -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
                             -Djacoco.output=tcpclient \
                             -Djacoco.address=127.0.0.1 \
-                            -Djacoco.port=10001"
+                            -Djacoco.port=10001"*/
                     }
                 }
             }
         }
-        stage('Quality Gates'){
+        /*stage('Quality Gates'){
             steps{
                 timeout(time: 2, unit: 'MINUTES') {
                 waitForQualityGate abortPipeline: false
               }
             }
-        }
+        }*/
         stage('Container Build') {
             steps {
                 dir('microservicio-service/'){
@@ -48,6 +48,7 @@ pipeline {
                     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockernexus_id  ', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
                         sh 'docker login  ${LOCAL_SERVER}:8083 -u $USERNAME -p $PASSWORD'
                         sh 'docker tag microservicio-service:latest ${LOCAL_SERVER}:8083/repository/docker-private/microservicio_nexus:dev'
+                        sh 'docker push ${LOCAL_SERVER}:8083/repository/docker-private/microservicio_nexus:dev'
                     }
                 }
             }
