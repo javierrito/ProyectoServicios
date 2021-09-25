@@ -33,13 +33,13 @@ pipeline {
             }
         }*/
         stage('Database') {
-        steps {
-            dir('liquibase/'){
-                sh '/opt/liquibase/liquibase --version'
-                sh '/opt/liquibase/liquibase --changeLogFile="changesets/db.changelog-master.xml" update'
-                echo 'Applying Db changes'
+            steps {
+                dir('liquibase/'){
+                    sh '/opt/liquibase/liquibase --version'
+                    sh '/opt/liquibase/liquibase --changeLogFile="changesets/db.changelog-master.xml" update'
+                    echo 'Applying Db changes'
+                }
             }
-        }
         }
         stage('Container Build') {
             steps {
