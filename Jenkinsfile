@@ -102,5 +102,18 @@ pipeline {
         //         }
         //     }
         // }
+
+        stage('Estres') {
+            steps {
+                dir('gatling/'){
+                    sh 'mvn gatling:test'
+                }
+            }
+            post {
+                always {
+                    gatlingArchive()
+                }
+            }
+        }
     }
 }
