@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment{
-        LOCAL_SERVER = '172.24.80.1'
+        LOCAL_SERVER = '192.168.100.13'
     }
     tools {
         maven 'M3_8_2'
