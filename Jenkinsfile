@@ -33,7 +33,7 @@ pipeline {
               }
             }
         }*/
-        stage('Frontend') {
+       /* stage('Frontend') {
             steps {
                 echo 'Building Frontend'
                 dir('Angular7BaseCli/'){
@@ -44,7 +44,7 @@ pipeline {
                     sh 'docker run -d --rm --name frontend-one -p 8010:80 frontend-web'
                 }
             }
-        }
+        }*/
         stage('Database') {
             steps {
                 dir('liquibase/'){
@@ -64,7 +64,7 @@ pipeline {
                 }
             }
         }
-         stage('Container Push Nexus') {
+         /*stage('Container Push Nexus') {
             steps {
                 dir('microservicio-service/'){
                     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockernexus_id  ', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
@@ -74,14 +74,15 @@ pipeline {
                     }
                 }
             }
-        }
+        }*/
         stage('Container Run') {
             steps {
                 sh 'docker stop microservicio-one || true'
-                sh 'docker run -d --rm --name microservicio-one -e SPRING_PROFILES_ACTIVE=qa -p 8090:8090 ${LOCAL_SERVER}:8083/repository/docker-private/microservicio_nexus:dev'
+                //sh 'docker run -d --rm --name microservicio-one -e SPRING_PROFILES_ACTIVE=qa -p 8090:8090 ${LOCAL_SERVER}:8083/repository/docker-private/microservicio_nexus:dev'
+                 sh 'docker run -d --rm --name microservicio-one -e SPRING_PROFILES_ACTIVE=qa -p 8090:8090 microservicio-service'
             }
         }
-        stage('Testing') {
+        /*stage('Testing') {
             steps {
                 dir('cypress/') {
                     // sh 'docker run --rm --name Cypress -v "D:/cursoMicroservicios/jenkins_home/workspace/Aleatorio/Cypress/cypress:/e2e" -w /e2e -e Cypress cypress/included:3.4.0'
@@ -89,7 +90,7 @@ pipeline {
                     sh 'docker run cypressfront'
                 }
             }
-        }
+        }*/
         // stage('tar videos') 
         // {
         //     steps 
