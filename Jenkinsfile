@@ -34,6 +34,32 @@ pipeline {
                 }
             }
         }
+        stage('Build and Analize two') {
+            when{
+                anyOf{
+                    changeset "*microservicio-service-two/**"
+                    expression{
+                        currentBuild.previousBuild.result != "SUCCESS"
+                    }
+                }
+            }
+            steps {
+                dir('microservicio-service-two/'){
+                    echo 'Execute Maven and Analizing with SonarServer'
+                    withSonarQubeEnv('SonarServer') {
+                        sh "mvn clean package" /*dependency-check:check sonar:sonar \
+                            -Dsonar.projectKey=21_MyCompany_Microservice \
+                            -Dsonar.projectName=21_MyCompany_Microservice \
+                            -Dsonar.sources=src/main \*/
+                           // -Dsonar.coverage.exclusions=**/*TO.java,**/*DO.java,**/curso/web/**/*,**/curso/persistence/**/*,**/curso/commons/**/*,**/curso/model/**/* \
+                           /* -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
+                            -Djacoco.output=tcpclient \
+                            -Djacoco.address=127.0.0.1 \
+                            -Djacoco.port=10001"*/
+                    }
+                }
+            }
+        }
         /*stage('Quality Gates'){
             steps{
                 timeout(time: 2, unit: 'MINUTES') {
@@ -84,6 +110,25 @@ pipeline {
                     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockerhub_id  ', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
                         sh 'docker login -u $USERNAME -p $PASSWORD'
                         sh 'docker build -t microservicio-service .'
+                    }
+                }
+            }
+        }
+
+         stage('Container Build two') {
+             when{
+                anyOf{
+                    changeset "*microservicio-service-two/**"
+                    expression{
+                        currentBuild.previousBuild.result != "SUCCESS"
+                    }
+                }
+            }
+            steps {
+                dir('microservicio-service-two/'){
+                    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockerhub_id  ', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+                        sh 'docker login -u $USERNAME -p $PASSWORD'
+                        sh 'docker build -t microservicio-service-two .'
                     }
                 }
             }
@@ -162,17 +207,37 @@ pipeline {
                   sh 'docker stop microservicio-two || true'
                 //sh 'docker run -d --rm --name microservicio-one -e SPRING_PROFILES_ACTIVE=qa -p 8090:8090 ${LOCAL_SERVER}:8083/repository/docker-private/microservicio_nexus:dev'
                  sh 'docker run -d --rm --name microservicio-two -e SPRING_PROFILES_ACTIVE=qa  microservicio-service'
-            }
+            }          
         }
-        /*stage('Testing') {
+         stage('Container Run two') {
+            // when{
+            //     anyOf{
+            //         changeset "*microservicio-service/**"
+            //         expression{
+            //             currentBuild.previousBuild.result != "SUCCESS"
+            //         }
+            //     }
+            // }
             steps {
-                dir('cypress/') {
-                    // sh 'docker run --rm --name Cypress -v "D:/cursoMicroservicios/jenkins_home/workspace/Aleatorio/Cypress/cypress:/e2e" -w /e2e -e Cypress cypress/included:3.4.0'
-                    sh 'docker build -t cypressfront .'
-                    sh 'docker run cypressfront'
-                }
+                sh 'docker stop microservicio-three || true'
+                //sh 'docker run -d --rm --name microservicio-one -e SPRING_PROFILES_ACTIVE=qa -p 8090:8090 ${LOCAL_SERVER}:8083/repository/docker-private/microservicio_nexus:dev'
+                 sh 'docker run -d --rm --name microservicio-three -e SPRING_PROFILES_ACTIVE=qa  microservicio-service-two'
+
+                  sh 'docker stop microservicio-four || true'
+                //sh 'docker run -d --rm --name microservicio-one -e SPRING_PROFILES_ACTIVE=qa -p 8090:8090 ${LOCAL_SERVER}:8083/repository/docker-private/microservicio_nexus:dev'
+                 sh 'docker run -d --rm --name microservicio-four -e SPRING_PROFILES_ACTIVE=qa  microservicio-service-two'
             }
-        }*/
+            
+        }
+    //    stage('Testing') {
+    //         steps {
+    //             dir('cypress/') {
+    //                 // sh 'docker run --rm --name Cypress -v "D:/cursoMicroservicios/jenkins_home/workspace/Aleatorio/Cypress/cypress:/e2e" -w /e2e -e Cypress cypress/included:3.4.0'
+    //                 sh 'docker build -t cypressfront .'
+    //                 sh 'docker run cypressfront'
+    //             }
+    //         }
+    //     }
         // stage('tar videos') 
         // {
         //     steps 
