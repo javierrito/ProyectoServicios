@@ -9,6 +9,14 @@ pipeline {
     }
     stages {
         stage('Build and Analize') {
+            when{
+                anyOf{
+                    changeset "*microservicio-service/**"
+                    expression{
+                        currentBuild.previousBuild.result != "SUCCESS"
+                    }
+                }
+            }
             steps {
                 dir('microservicio-service/'){
                     echo 'Execute Maven and Analizing with SonarServer'
@@ -46,6 +54,14 @@ pipeline {
             }
         }*/
         stage('Database') {
+             when{
+                anyOf{
+                    changeset "*liquibase/**"
+                    expression{
+                        currentBuild.previousBuild.result != "SUCCESS"
+                    }
+                }
+            }
             steps {
                 dir('liquibase/'){
                     sh '/opt/liquibase/liquibase --version'
@@ -55,6 +71,14 @@ pipeline {
             }
         }
         stage('Container Build') {
+             when{
+                anyOf{
+                    changeset "*microservicio-service/**"
+                    expression{
+                        currentBuild.previousBuild.result != "SUCCESS"
+                    }
+                }
+            }
             steps {
                 dir('microservicio-service/'){
                     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockerhub_id  ', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
@@ -66,6 +90,14 @@ pipeline {
         }
         
         stage('Eureka') {
+              when{
+                anyOf{
+                    changeset "*EurekaBase/**"
+                    expression{
+                        currentBuild.previousBuild.result != "SUCCESS"
+                    }
+                }
+            }
             steps {
                 dir('EurekaBase/'){
                     sh 'mvn clean package'
@@ -80,6 +112,14 @@ pipeline {
         }
 
          stage('Zuul') {
+                when{
+                anyOf{
+                    changeset "*ZuulBase/**"
+                    expression{
+                        currentBuild.previousBuild.result != "SUCCESS"
+                    }
+                }
+            }
             steps {
                 dir('ZuulBase/'){
                     sh 'mvn clean package'
@@ -106,6 +146,14 @@ pipeline {
             }
         }*/
         stage('Container Run') {
+            when{
+                anyOf{
+                    changeset "*microservicio-service/**"
+                    expression{
+                        currentBuild.previousBuild.result != "SUCCESS"
+                    }
+                }
+            }
             steps {
                 sh 'docker stop microservicio-one || true'
                 //sh 'docker run -d --rm --name microservicio-one -e SPRING_PROFILES_ACTIVE=qa -p 8090:8090 ${LOCAL_SERVER}:8083/repository/docker-private/microservicio_nexus:dev'
